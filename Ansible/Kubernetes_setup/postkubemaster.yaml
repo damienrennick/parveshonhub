@@ -1,0 +1,39 @@
+---
+
+- name: Post Configuration Master Server
+  hosts: all
+  become: true
+  gather_facts: no
+  tasks:
+
+    - name: initialize the cluster
+      shell: kubeadm init --apiserver-advertise-address="55.55.55.10" --upload-certs --apiserver-cert-extra-sans="55.55.55.10"  --node-name master --pod-network-cidr=55.55.0.0/16 >> cluster_initialized.txt
+      args:
+        chdir: $HOME
+        creates: cluster_initialized.txt
+# RUN THIS AFTER Cluster Join else kubectl go po, nodes wont work
+    - name: create .kube directory
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: $HOME/.kube/config
+        remote_src: yes
+
+    - name: install Pod network
+      become: yes
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml >> pod_network_setup.txt
+      args:
+        chdir: $HOME
+        creates: pod_network_setup.txt
+
+    # - name: Generate join command
+    #   command: kubeadm token create --print-join-command
+    #   register: join_command
+
+    # - debug: 
+    #     msg: "Join token is {{ join_command }}"

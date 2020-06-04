@@ -1,0 +1,11 @@
+---
+
+- name: Updating (all) and installing Packages 
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Update all packages using yum
+    yum:
+      name: [ "*", "yum-plugin-fastestmirror", "yum-utils", "device-mapper-persistent-data", "lvm2" ]
+      state: latest

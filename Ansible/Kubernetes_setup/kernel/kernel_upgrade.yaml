@@ -1,0 +1,54 @@
+---
+
+- import_playbook: ../allrpmsupdate/update_package.yaml
+
+- name: Kernel Upgrade to 5.X
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Checking OS version
+    shell: uname -a 
+
+  - name: Add an rpm signing key for new Kernel
+    rpm_key:
+      state: present
+      key: https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+
+  - name: Adding YUM repository for New Kernel
+    yum:
+      name: https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+      state: latest
+
+  - name: Enabling Elrepo-kernel
+    yum_repository:
+      name: elrepo-kernel
+      description: elrepo-kernel
+      baseurl: http://elrepo.org/linux/kernel/el7/$basearch/
+      mirrorlist: http://mirrors.coreix.net/elrepo/kernel/el7/$basearch/
+      state: present
+      enabled: yes
+      gpgcheck: yes
+
+  - name: Install New Kernel 5.X
+    yum:
+      name: kernel-ml
+      state: latest
+
+  - name: Configuring GRUB2 with Latest Kernel
+#    shell: grub2-set-default `cat /opt/grub2.cfg | grep CentOS | awk -F\( '{print i++ " " $2}' | grep 5.5 | awk '{print $1}'`
+    shell: grub2-set-default 0
+    become: yes
+    register: configupdate
+
+  - name: Debugging configs update.
+    debug:
+      msg: system {{ configupdate }}
+
+  - name: Generate the grub2 config with gurb2-mkconfig 
+    shell: grub2-mkconfig -o /boot/grub2/grub.cfg
+    become: yes
+
+  - name: Remove repository (and clean up left-over metadata)
+    shell: yum-config-manager --disable elrepo-kernel
+

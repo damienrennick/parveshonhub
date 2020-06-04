@@ -1,0 +1,10 @@
+---
+
+#- import_playbook: remove/remove_yum_repos.yaml
+- import_playbook: allrpmsupdate/update_package.yaml
+- import_playbook: swapConf/swap_main.yaml
+- import_playbook: remove/remove_yum_repos.yaml
+- import_playbook: docker/docker_install.yaml
+- import_playbook: remove/remove_yum_repos.yaml
+- import_playbook: kubernetes/kubernetes_install.yaml
+- import_playbook: remove/remove_yum_repos.yaml

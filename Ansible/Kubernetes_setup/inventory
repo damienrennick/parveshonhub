@@ -1,0 +1,9 @@
+[skube1]
+55.55.55.10
+
+[client1]
+55.55.55.11
+
+[smaster:children]
+skube1
+client1
