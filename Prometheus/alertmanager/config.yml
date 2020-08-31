@@ -1,0 +1,8 @@
+#Configure alertManager to shoot email or slack notification if alerts reached.
+route:
+    receiver: 'slack'
+#  smtp_smarthost: localhost:25
+#  smtp_from: me@gmail.com
+receivers:
+    - name: 'slack'
+#       slack_configs here:

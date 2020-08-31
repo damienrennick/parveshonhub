@@ -1,0 +1,56 @@
+global:
+  scrape_interval:     5s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  external_labels:
+    monitor: 'for-Pilz'
+
+rule_files:
+  - 'alert.rules'
+#adding alert Manager
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "localhost:9093"
+
+# Adding hosts/containers to prometheus
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          group: 'prometheus'
+
+  - job_name: 'node-exporter'
+    dns_sd_configs:
+    - names:
+      - 'tasks.node-exporter'
+      type: 'A'
+      port: 9100
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          group: 'node-exporter'
+
+  - job_name: 'nginx'
+    dns_sd_configs:
+    - names:
+      - 'tasks.nginx'
+      type: 'A'
+      port: 8080
+    static_configs:
+      - targets: ['localhost:8080']
+        labels:
+          group: 'nginx'
+      
+  - job_name: 'nginx-exporter'
+    dns_sd_configs:
+    - names:
+      - 'tasks.nginx-exporter'
+      type: 'A'
+      port: 8080
+    static_configs:
+      - targets: ['localhost:9113']
+        labels:
+          group: 'nginx-exporter'
